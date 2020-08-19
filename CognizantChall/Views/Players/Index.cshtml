@@ -1,0 +1,36 @@
+﻿@model IEnumerable<CognizantChall.Models.Players>
+
+@{
+    ViewData["Title"] = "TOP 3";
+}
+
+	<center><h1>@ViewData["Title"]</h1></center>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Successful solutions
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.nickname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.successfulTaskCount)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.id">Details</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

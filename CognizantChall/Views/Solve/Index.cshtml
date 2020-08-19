@@ -1,0 +1,112 @@
+﻿@model CognizantChall.Models.TempPlayers;
+@{
+	ViewData["Title"] = "Solve";
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript">
+
+	var array = @Html.Raw(
+	Json.Serialize(
+		((IEnumerable<Tasks>)ViewBag.fullTask).Select(task => new
+		{
+			taskId = task.id,
+			taskDesc = task.description,
+			taskInput = task.testInput
+		})
+		)
+	);
+	var chosenTask;
+
+	function chooseTask(value) {
+		for (i = 0; i < array.length; i++) {
+			if (array[i].taskId == value) {
+				chosenTask = array[i];
+			}
+		}
+	}
+
+	$(function(){
+		$("#taskSelect").change(function () {
+			var v = $(this).val();
+			chooseTask(v)
+			var description = chosenTask.taskDesc;
+			$('#desc').val(description);
+			});
+		});
+
+	$(document).ready(function(){
+        $("button").click(function(){
+
+				var to_compile = {
+				"LanguageChoice": "1",
+				"Program": $("#code").val(),
+				"Input": chosenTask.taskInput,
+			    "CompilerArgs" : ""
+			};
+
+		    $.ajax ({
+			url: "https://rextester.com/rundotnet/api",
+			        type: "POST",
+			        data: to_compile
+			}).done(function (data) {
+				$("#result").val(data.Result)
+				$('form').submit();
+				alert("Attempt submitted");
+			}).fail(function(data, err) {
+				alert("fail " + JSON.stringify(data) + " " + JSON.stringify(err));
+			});
+		});
+	});
+
+</script>
+
+<div class="row">
+	<div class="col-md-4">
+		<form asp-action="SolveTask">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label class="control-label">Name</label>
+				<input asp-for="nickname" class="form-control" />
+				<span asp-validation-for="nickname" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label class="control-label">Description</label>
+				<textarea id="desc" readonly="readonly" class="form-control"></textarea>
+			</div>
+			<div class="form-group">
+				<label class="control-label">Select task</label>
+				<select asp-for="taskId" asp-items="@ViewData["tasks"] as SelectList" class="form-control" id="taskSelect">
+					<option value=""> -- select --</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="control-label">Solution code</label>
+				<textarea id="code" class="form-control">
+using System;
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Text.RegularExpressions;
+
+        namespace Rextester
+        {
+            public class Program
+            {
+                public static void Main(string[] args)
+                {
+					//Your Code Here
+                    int nmb = Int32.Parse(Console.ReadLine());
+                    Console.WriteLine(nmb*nmb);
+                }
+            }
+        } 
+				</textarea>
+			</div>
+			<input asp-for="result" id="result" hidden="hidden"/>
+
+		</form>
+		<div class="form-group">
+			<button class="btn btn-primary"> Submit </button>
+		</div>
+	</div>
+</div>
